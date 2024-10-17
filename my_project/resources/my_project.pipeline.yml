@@ -1,0 +1,13 @@
+# The main pipeline for my_project
+resources:
+  pipelines:
+    my_project_pipeline:
+      name: fraud_detection_data_pipeline
+      catalog: emeka_data_science_and_engineering_workspace
+      target: my_project_${bundle.environment}
+      libraries:
+        - notebook:
+            path: ../src/fraud-detection-data-python.ipynb
+
+      configuration:
+        bundle.sourcePath: ${workspace.file_path}/src
