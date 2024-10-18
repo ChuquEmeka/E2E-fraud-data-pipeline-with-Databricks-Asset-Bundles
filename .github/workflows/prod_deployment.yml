@@ -48,7 +48,7 @@ jobs:
           echo "token = ${{ secrets.DATABRICKS_TOKEN }}" >> ~/.databrickscfg
 
       - uses: databricks/setup-cli@main
-      - run: databricks bundle run my-job --profile databricks --refresh-all #--bundle-config databricks.yml
+      - run: databricks bundle run my_project_job --profile databricks --refresh-all #--bundle-config databricks.yml
         working-directory: my_project  # Change this to point to the directory with databricks.yml
         env:
           DATABRICKS_BUNDLE_ENV: prod
