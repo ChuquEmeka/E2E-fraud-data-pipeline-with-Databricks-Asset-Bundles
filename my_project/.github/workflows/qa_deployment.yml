@@ -1,0 +1,45 @@
+# .github/workflows/qa_deployment.yml
+name: "QA (Development) deployment (update-pipeline branch)"
+
+concurrency: 1
+
+on:
+  pull_request:
+    branches:
+      - update-pipeline  # Trigger when a pull request targets the update-pipeline branch
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  deploy:
+    name: "Deploy bundle to dev (QA)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Install Databricks CLI
+      - uses: databricks/setup-cli@main
+
+      # Deploy the bundle using the 'databricks.yml' file to the 'dev' target
+      - run: databricks bundle deploy --bundle-config databricks.yml
+        working-directory: .
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
+          DATABRICKS_BUNDLE_ENV: dev
+
+  pipeline_update:
+    name: "Run pipeline update for dev (QA)"
+    runs-on: ubuntu-latest
+    needs:
+      - deploy
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: databricks/setup-cli@main
+      - run: databricks bundle run my-job --refresh-all --bundle-config databricks.yml
+        working-directory: .
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
+          DATABRICKS_BUNDLE_ENV: dev

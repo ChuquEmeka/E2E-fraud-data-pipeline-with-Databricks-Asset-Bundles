@@ -1,0 +1,42 @@
+# .github/workflows/prod_deployment.yml
+name: "Production deployment (master branch)"
+
+concurrency: 1
+
+on:
+  push:
+    branches:
+      - master  # Trigger on the master branch
+
+jobs:
+  deploy:
+    name: "Deploy bundle to prod"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Install Databricks CLI
+      - uses: databricks/setup-cli@main
+
+      # Deploy the bundle using the 'databricks.yml' file to the 'prod' target
+      - run: databricks bundle deploy --bundle-config databricks.yml
+        working-directory: .
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
+          DATABRICKS_BUNDLE_ENV: prod
+
+  pipeline_update:
+    name: "Run pipeline update for prod"
+    runs-on: ubuntu-latest
+    needs:
+      - deploy
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: databricks/setup-cli@main
+      - run: databricks bundle run my-job --refresh-all --bundle-config databricks.yml
+        working-directory: .
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
+          DATABRICKS_BUNDLE_ENV: prod
