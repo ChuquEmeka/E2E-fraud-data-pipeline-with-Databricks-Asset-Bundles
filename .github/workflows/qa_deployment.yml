@@ -20,7 +20,7 @@ jobs:
       - uses: databricks/setup-cli@main
 
       # Deploy the bundle using the 'databricks.yml' file to the 'dev' target
-      - run: databricks bundle deploy --profile databricks --bundle-config databricks.yml
+      - run: databricks bundle deploy --profile databricks #--bundle-config databricks.yml
         working-directory: my_project  # Change this to point to the directory with databricks.yml
         env:
           DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
