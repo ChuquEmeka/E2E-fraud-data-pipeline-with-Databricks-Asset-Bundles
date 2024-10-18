@@ -26,9 +26,16 @@ resources:
           pipeline_task:
             pipeline_id: ${resources.pipelines.my_project_pipeline.id}
         
+        - task_key: fraud_metrics
+          depends_on:
+              - task_key: refresh_pipeline
+          job_cluster_key: job_cluster
+          notebook_task:
+            notebook_path: ../src/dashboard_metrics.ipynb
+
         - task_key: main_task
           depends_on:
-            - task_key: refresh_pipeline
+            - task_key: fraud_metrics
           job_cluster_key: job_cluster
           python_wheel_task:
             package_name: my_project
@@ -47,6 +54,5 @@ resources:
             autoscale:
                 min_workers: 1
                 max_workers: 4
-            # instance_profile_arn : databricks-ec2
             aws_attributes:
                   instance_profile_arn: arn:aws:iam::863518444424:instance-profile/databricks-ec2
