@@ -16,6 +16,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # Create .databrickscfg file from secrets
+      - name: Create Databricks Config
+        run: |
+          echo "[DEFAULT]" > ~/.databrickscfg
+          echo "host = ${{ secrets.DATABRICKS_HOST }}" >> ~/.databrickscfg
+          echo "token = ${{ secrets.DATABRICKS_TOKEN }}" >> ~/.databrickscfg
+
       # Install Databricks CLI
       - uses: databricks/setup-cli@main
 
@@ -34,6 +41,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      # Create .databrickscfg file from secrets
+      - name: Create Databricks Config
+        run: |
+          echo "[DEFAULT]" > ~/.databrickscfg
+          echo "host = ${{ secrets.DATABRICKS_HOST }}" >> ~/.databrickscfg
+          echo "token = ${{ secrets.DATABRICKS_TOKEN }}" >> ~/.databrickscfg
+
       - uses: databricks/setup-cli@main
       - run: databricks bundle run my-job --profile databricks --refresh-all --bundle-config databricks.yml
         working-directory: my_project  # Change this to point to the directory with databricks.yml
