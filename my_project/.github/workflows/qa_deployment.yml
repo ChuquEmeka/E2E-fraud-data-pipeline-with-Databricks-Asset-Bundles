@@ -4,12 +4,12 @@ name: "QA (Development) deployment (update-pipeline branch)"
 concurrency: 1
 
 on:
-  pull_request:
+  push:
     branches:
-      - update-pipeline  # Trigger when a pull request targets the update-pipeline branch
-    types:
-      - opened
-      - synchronize
+      - update-pipeline  
+    # types:
+    #   - opened
+    #   - synchronize
 
 jobs:
   deploy:
