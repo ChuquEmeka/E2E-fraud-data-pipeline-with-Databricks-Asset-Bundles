@@ -21,7 +21,7 @@ jobs:
         run: |
           echo "[DEFAULT]" > ~/.databrickscfg
           echo "host = ${{ secrets.DATABRICKS_HOST }}" >> ~/.databrickscfg
-          echo "token = ${{ secrets.DATABRICKS_TOKEN }}" >> ~/.databrickscfg
+          echo "token = ${{ secrets.SP_TOKEN }}" >> ~/.databrickscfg
 
       # Install Databricks CLI
       - uses: databricks/setup-cli@main
@@ -46,7 +46,7 @@ jobs:
         run: |
           echo "[DEFAULT]" > ~/.databrickscfg
           echo "host = ${{ secrets.DATABRICKS_HOST }}" >> ~/.databrickscfg
-          echo "token = ${{ secrets.DATABRICKS_TOKEN }}" >> ~/.databrickscfg
+          echo "token = ${{ secrets.SP_TOKEN}}" >> ~/.databrickscfg
 
       - uses: databricks/setup-cli@main
       - run: databricks bundle run my-job --profile databricks --refresh-all --bundle-config databricks.yml
