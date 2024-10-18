@@ -20,8 +20,8 @@ jobs:
       - uses: databricks/setup-cli@main
 
       # Deploy the bundle using the 'databricks.yml' file to the 'prod' target
-      - run: databricks bundle deploy --profile databricks #--bundle-config databricks.yml
-        working-directory: .
+      - run: databricks bundle deploy --profile databricks --bundle-config databricks.yml
+        working-directory: my_project  # Change this to point to the directory with databricks.yml
         env:
           DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
           DATABRICKS_BUNDLE_ENV: prod
@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: databricks/setup-cli@main
       - run: databricks bundle run my-job --profile databricks --refresh-all --bundle-config databricks.yml
-        working-directory: .
+        working-directory: my_project  # Change this to point to the directory with databricks.yml
         env:
           DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
           DATABRICKS_BUNDLE_ENV: prod
