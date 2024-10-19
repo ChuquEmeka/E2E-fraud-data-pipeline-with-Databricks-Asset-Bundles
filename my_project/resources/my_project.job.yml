@@ -33,13 +33,13 @@ resources:
           notebook_task:
             notebook_path: ../src/dashboard_metrics.ipynb
 
-        - task_key: main_task
-          depends_on:
-            - task_key: fraud_metrics
-          job_cluster_key: job_cluster
-          python_wheel_task:
-            package_name: my_project
-            entry_point: main
+        # - task_key: main_task
+        #   depends_on:
+        #     - task_key: fraud_metrics
+        #   job_cluster_key: job_cluster
+        #   python_wheel_task:
+        #     package_name: my_project
+        #     entry_point: main
           libraries:
             # By default we just include the .whl file generated for the my_project package.
             # See https://docs.databricks.com/dev-tools/bundles/library-dependencies.html
