@@ -1,0 +1,54 @@
+# .github/workflows/prod_deployment.yml
+name: "Production deployment (master branch)"
+
+concurrency: 1
+
+on:
+  push:
+    branches:
+      - master  # Trigger on the master branch
+
+jobs:
+  deploy:
+    name: "Deploy bundle to prod"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Create .databrickscfg file from secrets
+      - name: Create Databricks Config
+        run: |
+          echo "[databricks]" > ~/.databrickscfg
+          echo "host = ${{ secrets.DATABRICKS_HOST }}" >> ~/.databrickscfg
+          echo "token = ${{ secrets.DATABRICKS_TOKEN }}" >> ~/.databrickscfg
+
+      # Install Databricks CLI
+      - uses: databricks/setup-cli@main
+
+      # Deploy the bundle using the 'databricks.yml' file to the 'prod' target
+      - run: databricks bundle deploy --profile databricks #--bundle-config databricks.yml
+        working-directory: my_project  # Change this to point to the directory with databricks.yml
+        env:
+          DATABRICKS_BUNDLE_ENV: prod
+
+  pipeline_update:
+    name: "Run pipeline update for prod"
+    runs-on: ubuntu-latest
+    needs:
+      - deploy
+
+    steps:
+      - uses: actions/checkout@v3
+      # Create .databrickscfg file from secrets
+      - name: Create Databricks Config
+        run: |
+          echo "[databricks]" > ~/.databrickscfg
+          echo "host = ${{ secrets.DATABRICKS_HOST }}" >> ~/.databrickscfg
+          echo "token = ${{ secrets.DATABRICKS_TOKEN }}" >> ~/.databrickscfg
+
+      - uses: databricks/setup-cli@main
+      - run: databricks bundle run my_project_job --profile databricks --refresh-all #--bundle-config databricks.yml
+        working-directory: my_project  # Change this to point to the directory with databricks.yml
+        env:
+          DATABRICKS_BUNDLE_ENV: prod

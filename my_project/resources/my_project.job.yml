@@ -2,7 +2,7 @@
 resources:
   jobs:
     my_project_job:
-      name: my_project_job
+      name: fraud_detection_job
 
       trigger:
         # Run this job every day, exactly one day from the last run; see https://docs.databricks.com/api/workspace/jobs/create#trigger
@@ -15,28 +15,25 @@ resources:
           - nweke.edeh@gmail.com
 
       tasks:
-        - task_key: notebook_task
-          job_cluster_key: job_cluster
-          notebook_task:
-            notebook_path: ../src/notebook.ipynb
+        # - task_key: notebook_task
+        #   job_cluster_key: job_cluster
+        #   notebook_task:
+        #     notebook_path: ../src/notebook.ipynb
         
         - task_key: refresh_pipeline
-          depends_on:
-            - task_key: notebook_task
+          # depends_on:
+          #   - task_key: notebook_task
           pipeline_task:
             pipeline_id: ${resources.pipelines.my_project_pipeline.id}
         
-        - task_key: main_task
+        - task_key: fraud_metrics
           depends_on:
-            - task_key: refresh_pipeline
+              - task_key: refresh_pipeline
           job_cluster_key: job_cluster
-          python_wheel_task:
-            package_name: my_project
-            entry_point: main
+          notebook_task:
+            notebook_path: ../src/dashboard_metrics.ipynb
+
           libraries:
-            # By default we just include the .whl file generated for the my_project package.
-            # See https://docs.databricks.com/dev-tools/bundles/library-dependencies.html
-            # for more information on how to add other libraries.
             - whl: ../dist/*.whl
 
       job_clusters:
@@ -47,4 +44,7 @@ resources:
             autoscale:
                 min_workers: 1
                 max_workers: 4
-            instance_profile : databricks-ec2
+            aws_attributes:
+                  instance_profile_arn: arn:aws:iam::863518444424:instance-profile/databricks-ec2
+
+
