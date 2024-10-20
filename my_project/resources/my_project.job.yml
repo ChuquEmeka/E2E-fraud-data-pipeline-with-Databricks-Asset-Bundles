@@ -33,17 +33,7 @@ resources:
           notebook_task:
             notebook_path: ../src/dashboard_metrics.ipynb
 
-        # - task_key: main_task
-        #   depends_on:
-        #     - task_key: fraud_metrics
-        #   job_cluster_key: job_cluster
-        #   python_wheel_task:
-        #     package_name: my_project
-        #     entry_point: main
           libraries:
-            # By default we just include the .whl file generated for the my_project package.
-            # See https://docs.databricks.com/dev-tools/bundles/library-dependencies.html
-            # for more information on how to add other libraries.
             - whl: ../dist/*.whl
 
       job_clusters:
@@ -56,3 +46,5 @@ resources:
                 max_workers: 4
             aws_attributes:
                   instance_profile_arn: arn:aws:iam::863518444424:instance-profile/databricks-ec2
+
+
