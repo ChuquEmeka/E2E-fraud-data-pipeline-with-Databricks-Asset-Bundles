@@ -175,7 +175,7 @@ DAB/
   
 ## **7. Delta Live Tables (DLT) Lineage Graph for Fraud Detection Pipeline**
 
-The attached graph shows the **lineage** of the Delta Live Tables (DLT) pipeline, outlining the flow of data between tables and views in the fraud detection pipeline. This graph visually represents how data is processed and transformed as it moves from upstream raw data to downstream aggregated views and metrics.  
+The attached graph shows the **lineage** of the Delta Live Tables (DLT) pipeline, outlining the flow of data between tables and views in the fraud detection pipeline. This graph visually represents how data is processed and transformed as it moves from upstream raw data to downstream aggregated views and metrics as defined in [fraud_detection_data_python.py](./src/my_project/fraud_detection_data_python.py) transformation dlt pipeline script.  
 ![ER](output_images/dlt_pipeline_lineage_graph.png)  
   
 ## **Job and Pipeline Flow**
@@ -352,7 +352,26 @@ This section details the **costs incurred** during the development and deploymen
 
 The detailed breakdown will provide insights into **managing cloud costs** effectively while **scaling the project**.  
 ![ER](output_images/cost.png)  
-![ER](output_images/cost2.png)
+![ER](output_images/cost2.png)  
+
+  
+
+## **12. Overall Project Summary: Fraud Detection Data Pipeline**
+
+The **Fraud Detection Data Pipeline** utilizes **Databricks Delta Live Tables (DLT)** and **Databricks Asset Bundles** to create an efficient solution for detecting fraudulent transactions, structured using the **Medallion Architecture** (Bronze, Silver, and Gold layers).
+
+---
+
+### **Key Highlights**
+
+- **Efficient Packaging and Deployment**: **Databricks Asset Bundles** streamlined the deployment process across both development (`my_project_dev`) and production (`my_project_prod`) environments, enabling easy version control and consistent setup.
+  
+- **Job Integration**: Added a **job task** to automate pipeline execution, ensuring the reliable processing of data.
+
+- **CI/CD Workflows**: Established CI/CD workflows (`qa_deployment.yml` and `prod_deployment.yml`) to automate deployment and updates, triggered by changes to designated branches.
+
+---
+
 
 
 
