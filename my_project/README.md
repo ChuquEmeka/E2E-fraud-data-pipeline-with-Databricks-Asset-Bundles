@@ -41,7 +41,26 @@ While the trial covered Databricks usage, AWS charges for the **EC2 instances** 
 4. Built the fraud detection pipeline within the free trial period, ensuring efficient resource use.
 5. Monitored AWS EC2 instance costs closely, with a detailed breakdown to follow in the cost section.
 
+---  
+## **Raw Data Generation**
+
+This **[fraud-detection-raw-data.py](./raw_data_simulation/fraud-detection-raw-data.py)** file generates **synthetic user and transaction data** raw data for this project and uploads it to **Amazon S3**.
+
+- **Purpose**: To create realistic **user and transaction records** for testing fraud detection algorithms.
+- **Output**: **JSON files** stored in **S3**, organized by year.  
+### **Key Features**
+
+- **User Data**: Generates profiles for **1,000 users** with attributes like `UserID`, `Age`, `Gender`, and `Account Creation Date`.
+  
+- **Transaction Data**: Creates **15,000 transaction records** including `TransactionID`, `Amount`, `Type`, `Merchant`, and fraud indicators (`IsFraud`).
+  
+- **Data Merging**: Combines **user and transaction data** for comprehensive datasets.
+
+- **AWS Integration**: Uses **Boto3** to upload generated data to a specified **S3 bucket**.  
+![ER](output_images/S3_bucket.png)
+
 ---
+
 
 ## **3. S3 Access Configuration with Instance Profile**
 
@@ -282,10 +301,6 @@ While developing, I used the **same workspace** for both development and product
    
    - **Production Layers**: The production catalog contains the same Bronze, Silver, and Gold layers with the same set of tables and views, ensuring consistency between development and production environments.
 
----
-
-### **Conclusion**
-
 Although I used the **same workspace** (`emeka_data_science_and_engineering_workspace`) for both development and production environments as part of an experiment, this is **not ideal**. Typically, separate workspaces should be used to ensure proper isolation. However, by using **separate catalogs** (`my_project_dev` and `my_project_prod`) within the same workspace, I was able to simulate the separation of development and production environments.
 
 This setup allowed for effective data governance, even within the constraints of using a single workspace.  
@@ -293,7 +308,7 @@ This setup allowed for effective data governance, even within the constraints of
 ## **9. CI/CD Deployment Workflows**
 
 This project utilizes **GitHub Actions** workflows for **CI/CD deployment** to both development and production environments. The workflows are configured for seamless deployment of the fraud detection pipeline using **Databricks Asset Bundles**.
-
+![ER](output_images/job_git_action_workflow.png)   
 ---
 
 ### **QA Deployment Configuration ([qa_deployment.yml](./.github/workflows/qa_deployment.yml))**
@@ -354,7 +369,31 @@ The detailed breakdown will provide insights into **managing cloud costs** effec
 ![ER](output_images/cost.png)  
 ![ER](output_images/cost2.png)  
 
-  
+## **11. Data Governance**
+
+To ensure **data integrity**, **security**, and **compliance** , a data governance framework is applied, covering various aspects of data lifecycle management.
+
+---
+
+### **Key Data Governance Measures**
+
+1. **Access Control and Security**:
+   - **Role-Based Access Control (RBAC)**: Implement **Unity Catalog** in Databricks to manage access to data at the catalog, schema, and table levels, with role-specific permissions for development and production environments.
+   - **AWS IAM Policies**: Use **AWS IAM** to control access to **S3** buckets, ensuring only authorized services and users can read/write data.
+
+2. **Data Quality and Validation**:
+   - **Delta Live Tables (DLT) Expectations**: Apply **data quality rules** using DLT to validate data during ingestion (e.g., non-null checks, value range enforcement).
+   - **Validation Checks**: Include data validation tests in the **QA deployment workflow** to ensure the accuracy and completeness of data before deployment.
+   - Due to time constraints, data quality and validation checks, as well as **unit tests**, were not fully implemented in this project. However, I implement **data quality rules, validation checks, and unit tests**      professionally, including non-null checks, value range enforcement, and comprehensive tests to ensure accuracy and completeness.
+
+3. **Data Lineage and Documentation**:
+   - **Automated Lineage Tracking**: Use **Delta Live Tables** to automatically generate data lineage for tracking transformations from raw data (Bronze) to aggregated views (Gold).
+   - **Documentation**: Maintain detailed documentation of tables, transformations, and pipeline configurations for transparency. 
+
+---
+
+This data governance approach ensures secure, compliant, and high-quality data handling throughout the **Fraud Detection Data Pipeline**.
+
 
 ## **12. Overall Project Summary: Fraud Detection Data Pipeline**
 
