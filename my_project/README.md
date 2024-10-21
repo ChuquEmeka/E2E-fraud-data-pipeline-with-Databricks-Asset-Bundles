@@ -1,21 +1,23 @@
 # **Databricks Fraud Detection Pipeline with Asset Bundles**
 
 ## **Table of Contents**
-- [Project Overview](#project-overview)
-- [Free Trial Setup](#free-trial-setup)
-- [S3 Access Configuration with Instance Profile](#s3-access-configuration-with-instance-profile)
-- [Databricks Asset Bundles for Fraud Detection Pipeline](#databricks-asset-bundles-for-fraud-detection-pipeline)
-- [Prerequisites for Activating Databricks Asset Bundles](#prerequisites-for-activating-databricks-asset-bundles)
-- [Project Structure](#project-structure)
-- [Delta Live Tables (DLT) Lineage Graph for Fraud Detection Pipeline](#delta-live-tables-dlt-lineage-graph-for-fraud-detection-pipeline)
-- [Project Cost Breakdown](#project-cost-breakdown-coming-soon)
-- [Conclusion](#conclusion-coming-soon)
+1. [Project Overview](#project-overview)
+2. [Free Trial Setup](#free-trial-setup)
+3. [S3 Access Configuration with Instance Profile](#s3-access-configuration-with-instance-profile)
+4. [Databricks Asset Bundles for Fraud Detection Pipeline](#databricks-asset-bundles-for-fraud-detection-pipeline)
+5. [Prerequisites for Activating Databricks Asset Bundles](#prerequisites-for-activating-databricks-asset-bundles)
+6. [Project Structure](#project-structure)
+7. [Delta Live Tables (DLT) Lineage Graph for Fraud Detection Pipeline](#delta-live-tables-dlt-lineage-graph-for-fraud-detection-pipeline)
+8. [Unity Catalog Setup for Fraud Detection Pipeline](#unity-catalog-setup-for-fraud-detection-pipeline)
+9. [CI/CD Deployment Workflows](#cicd-deployment-workflows)
+10. [Project Cost Breakdown](#project-cost-breakdown-coming-soon)
+11. [Conclusion](#conclusion-coming-soon)
 
 ---
 
 ## **1. Project Overview**
 
-This project focuses on developing a robust fraud detection pipeline using **Databricks' Delta Live Tables (DLT)** alongside **Databricks Asset Bundles** for efficient development, packaging, and deployment. The pipeline was built and deployed within the Databricks platform on AWS infrastructure, integrating **Amazon S3** for scalable data storage.
+This project focuses on developing a robust fraud detection data pipeline using **Databricks' Delta Live Tables (DLT)** alongside **Databricks Asset Bundles** for efficient development, packaging, and deployment. The pipeline was built and deployed within the Databricks platform on AWS infrastructure, integrating **Amazon S3** for scalable data storage.
 
 ### **Key Highlights:**
 - **Technology Stack:** Databricks, Delta Live Tables (DLT), AWS (EC2, S3)
@@ -80,29 +82,44 @@ Before working with **Databricks Asset Bundles**, several key steps and installa
     winget search databricks
     winget install Databricks.DatabricksCLI
     ```
-    After installation, restart the Command Prompt and verify the installation using:
+    After installation, I restarted my computer and verified the installation using:
     ```bash
     databricks -v
     ```
 
-2. **Initialize the Databricks Bundle**: Navigate to the project directory and initialize the bundle:
+2. **Authenticate Databricks Workspace**: Once the **Databricks CLI** is installed, authenticate your **Databricks workspace** to enable the CLI to interact with the workspace for deployments.
+
+    ### **Steps to Authenticate**:
+    1. **Generate an Access Token**:
+       - In Databricks, navigate to **Settings > User Settings > Access Tokens** and generate a new access token.
+    2. **Configure Workspace Profile**:
+       - Use the following command to configure your workspace profile with the generated token:
+         ```bash
+         databricks configure --profile databricks
+         ```
+       - When prompted, enter your **Databricks Host URL** and the **Access Token**.
+
+    This step ensures **secure communication** between the **Databricks CLI** and your **Databricks workspace**, allowing the CLI to execute commands for deployments.
+
+3. **Initialize the Databricks Bundle**: Navigate to the project directory and initialize the bundle:
     ```bash
+    cd my_project
     databricks bundle init
     ```
 
-3. **Retrieve and Export Bundle Schema**: Retrieve the schema of the Databricks bundle and save it to a configuration file:
+4. **Retrieve and Export Bundle Schema**: Retrieve the schema of the Databricks bundle and save it to a configuration file:
     ```bash
     databricks bundle schema --profile databricks
     databricks bundle schema > bundle_config_schema.json
     ```
 
-4. **Validate and Deploy the Bundle**: Validate and deploy the Databricks bundle:
+5. **Validate and Deploy the Bundle**: Validate and deploy the Databricks bundle:
     ```bash
     databricks bundle validate --profile databricks
     databricks bundle deploy --profile databricks
     ```
 
-5. **Run the Job**: Execute the fraud detection pipeline by running the Databricks job:
+6. **Run the Job**: Execute the fraud detection pipeline by running the Databricks job:
     ```bash
     databricks bundle run my_project_job --profile databricks
     ```
@@ -154,10 +171,45 @@ DAB/
 ├── README.md                      # Project documentation and instructions
 ├── requirements-dev.txt           # Development dependencies (e.g., testing libraries)
 └── setup.py                       # Script for building and packaging the project
-
+ ``` 
+  
 ## **7. Delta Live Tables (DLT) Lineage Graph for Fraud Detection Pipeline**
 
-The attached graph shows the **lineage** of the Delta Live Tables (DLT) pipeline, outlining the flow of data between tables and views in the fraud detection pipeline. This graph visually represents how data is processed and transformed as it moves from upstream raw data to downstream aggregated views and metrics.
+The attached graph shows the **lineage** of the Delta Live Tables (DLT) pipeline, outlining the flow of data between tables and views in the fraud detection pipeline. This graph visually represents how data is processed and transformed as it moves from upstream raw data to downstream aggregated views and metrics.  
+![ER](output_images/dlt_pipeline_lineage_graph.png)  
+  
+## **Job and Pipeline Flow**
+
+This section details the **job configuration** and **pipeline setup** for automating the daily execution of the fraud detection pipeline and the subsequent calculation of metrics.
+
+---
+
+### **Job Configuration ([my_project.job.yml](./resources/my_project.job.yml))**
+
+The `my_project.job.yml` file defines the configuration for a **Databricks job** that automates the daily execution of the fraud detection pipeline.
+
+- **Job Name**: `fraud_detection_job`
+- **Trigger**: Runs every day with a 24-hour interval between runs.
+- **Email Notifications**: Sends failure notifications to `nweke.edeh@gmail.com`.
+- **Tasks**:
+  - **Task 1 (`refresh_pipeline`)**: Refreshes the fraud detection pipeline using the pipeline ID from `my_project.pipeline.yml`.
+  - **Task 2 (`fraud_metrics`)**: Depends on the `refresh_pipeline` task and runs the `dashboard_metrics.ipynb` notebook to compute and collect fraud detection metrics after the pipeline has refreshed.  
+![ER](output_images/job_lineage_graph.png) 
+- **Cluster Configuration**:
+  - **Autoscaling Spark Cluster**: Configured with a minimum of 1 worker and a maximum of 4 workers, running **Spark version 15.4.x with Scala 2.12**.
+  - **AWS Instance Profile**: Uses an AWS instance profile for secure access to AWS services like **S3**.
+
+---
+
+### **Pipeline Configuration ([my_project.pipeline.yml](./resources/my_project.pipeline.yml))**
+
+The `my_project.pipeline.yml` file defines the **Databricks Delta Live Tables (DLT) pipeline** that processes the fraud detection data.
+
+- **Pipeline Name**: `fraud_detection_data_pipeline`
+- **Unity Catalog Integration**: Targets the `emeka_data_science_and_engineering_workspace` and dynamically applies the appropriate target schema based on the environment (`my_project_${bundle.environment}`).
+- **Notebook as Library**: Uses the `fraud-detection-data-python.ipynb` notebook to perform data transformation and processing, moving data through the **Bronze**, **Silver**, and **Gold layers**.
+- **Pipeline Configuration**: Dynamically references project source files using `bundle.sourcePath`, ensuring that the right resources are deployed in the appropriate environment.
+
 
 ---
 
@@ -208,7 +260,8 @@ While developing, I used the **same workspace** for both development and product
 
 ---
 
-### **Development and Production Catalogs**
+### **Development and Production Catalogs**  
+![ER](output_images/unity_catalog.png) 
 
 1. **Development Catalog: `my_project_dev`**
    - In the `my_project_dev` catalog, I developed and tested the tables and views that form the core of the pipeline. This catalog includes the following layers:
@@ -235,5 +288,73 @@ While developing, I used the **same workspace** for both development and product
 
 Although I used the **same workspace** (`emeka_data_science_and_engineering_workspace`) for both development and production environments as part of an experiment, this is **not ideal**. Typically, separate workspaces should be used to ensure proper isolation. However, by using **separate catalogs** (`my_project_dev` and `my_project_prod`) within the same workspace, I was able to simulate the separation of development and production environments.
 
-This setup allowed for effective data governance, even within the constraints of using a single workspace.
+This setup allowed for effective data governance, even within the constraints of using a single workspace.  
+  
+## **9. CI/CD Deployment Workflows**
+
+This project utilizes **GitHub Actions** workflows for **CI/CD deployment** to both development and production environments. The workflows are configured for seamless deployment of the fraud detection pipeline using **Databricks Asset Bundles**.
+
+---
+
+### **QA Deployment Configuration ([qa_deployment.yml](./.github/workflows/qa_deployment.yml))**
+
+This GitHub Actions workflow handles the CI/CD deployment to the **development environment (QA)**. It is triggered by a push to the `update-pipeline` branch, but the trigger can be customized for other organizational workflows, such as pull requests or other events.
+
+#### **Workflow Steps:**
+
+1. **Deploy Bundle to Dev (QA)**:
+   - **Trigger**: Initiated by a push to the `update-pipeline` branch, but can be modified for other events.
+   - **Authentication**: Creates a `~/.databrickscfg` file using secrets for Databricks authentication.
+   - **Databricks CLI Setup**: Installs the Databricks CLI for deployment.
+   - **Deployment**: Deploys the bundle to the development environment using the `databricks.yml` file.
+
+2. **Run Pipeline Update for Dev (QA)**:
+   - **Execution**: After deployment, the job (`my_project_job`) is run to refresh the pipeline in the QA environment.
+   - **Authentication and CLI Setup**: Repeats authentication and CLI setup steps.
+   - **Job Execution**: Executes the job to ensure the pipeline is updated with the latest data.
+
+---
+
+### **Production Deployment Workflow ([prod_deployment.yml](./.github/workflows/prod_deployment.yml))**
+
+This GitHub Actions workflow manages the deployment to the **production environment**. It is triggered by a push to the `master` branch but can be configured for other triggers based on organizational requirements.
+
+#### **Workflow Steps:**
+
+1. **Deploy Bundle to Prod**:
+   - **Trigger**: Activated by a push to the `master` branch, with options for other event types.
+   - **Authentication**: Creates the `~/.databrickscfg` file using secrets for secure access.
+   - **Databricks CLI Setup**: Installs the Databricks CLI to handle deployments.
+   - **Deployment**: Deploys the bundle to the production environment using the `databricks.yml` file.
+
+2. **Run Pipeline Update for Prod**:
+   - **Execution**: Following deployment, the job (`my_project_job`) is executed to refresh the production pipeline.
+   - **Authentication and CLI Setup**: Similar steps for authentication and CLI installation.
+   - **Job Execution**: Runs the job to update the pipeline with current data.
+
+---
+
+### **Key Points**
+
+- **Adjustable Triggers**: The workflows can be tailored to trigger on various events, such as pull requests or manual deployments, according to team practices.
+- **Streamlined Process**: Both workflows maintain a consistent process for authentication, deployment, and job execution, ensuring efficient CI/CD management for both development and production environments.  
+
+
+  
+
+## **10. Project Cost Breakdown**
+
+This section details the **costs incurred** during the development and deployment of the fraud detection pipeline. Although I utilized the **Databricks free trial** for the project, I incurred the following costs from **AWS**:
+
+- **AWS EC2 Instance Usage**: Charges incurred for running Databricks clusters configured on **EC2 instances**.
+- **S3 Storage Costs**: Costs associated with storing **raw and processed data** for the pipeline in **Amazon S3**.
+- **Databricks Charges**: These charges will be incurred after the **free trial ends** for any continuous job execution.
+
+The detailed breakdown will provide insights into **managing cloud costs** effectively while **scaling the project**.  
+![ER](output_images/cost.png)  
+![ER](output_images/cost2.png)
+
+
+
+
 
