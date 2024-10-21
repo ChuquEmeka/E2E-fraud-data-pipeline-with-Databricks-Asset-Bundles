@@ -332,7 +332,8 @@ This GitHub Actions workflow handles the CI/CD deployment to the **development e
 
 ### **Production Deployment Workflow ([prod_deployment.yml](./.github/workflows/prod_deployment.yml))**
 
-This GitHub Actions workflow manages the deployment to the **production environment**. It is triggered by a push to the `master` branch but can be configured for other triggers based on organizational requirements.
+This GitHub Actions workflow manages the deployment to the **production environment**. It is triggered by a push to the `master` branch but can be configured for other triggers based on organizational requirements.  
+![ER](output_images/prod_deplo_workflow.png)
 
 #### **Workflow Steps:**
 
