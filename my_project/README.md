@@ -30,16 +30,30 @@ This documentation outlines the setup process, access configuration, and deploym
 
 ## **2. Free Trial Setup**
 
-To begin the project, I took advantage of the **Databricks free trial** through the AWS Marketplace. This trial granted access to Databricks' features for 14 days, allowing me to build, test, and deploy the pipeline within this window.
+Professionally, I have been using Databricks platform for over two years, but to begin this private project, I took advantage of the **Databricks free trial**. This trial granted access to Databricks' features for 14 days, allowing me to build, test, and deploy the pipeline within this window.
 
-While the trial covered Databricks usage, AWS charges for the **EC2 instances** used to run Databricks clusters were incurred. These costs, along with other resource usage, will be detailed in the Project Cost Breakdown section.
+### Setting Up My Databricks Free Trial
 
-### **Steps Taken:**
-1. Signed up for Databricks via AWS Marketplace.
-2. Set up my Databricks workspace linked to my AWS account.
-3. Managed compute and storage through the AWS Management Console.
-4. Built the fraud detection pipeline within the free trial period, ensuring efficient resource use.
-5. Monitored AWS EC2 instance costs closely, with a detailed breakdown to follow in the cost section.
+To begin using **Databricks**, I signed up for the **free trial** by following these steps:
+
+1. **Sign Up**:
+   - I navigated to the **Try Databricks** page.
+   - I entered my name, company, email, and title, then clicked **Continue**.
+
+2. **Cloud Provider Selection**:
+   - I selected **Amazon Web Services (AWS)** as my cloud provider and clicked **Get started**.
+
+3. **Trial Information**:
+   - I noted that the Databricks trial was free, but I needed an active AWS account since Databricks utilized compute and storage resources within AWS.
+
+4. **Email Verification**:
+   - I looked for the welcome email and clicked the link to verify my email address.
+
+5. **Account Setup**:
+   - After verification, I was redirected to the **Databricks account console**, where I set up my Databricks account and created a workspace.
+
+**Note**: While the trial period was free, I had the option to upgrade at any time by providing my credit card information.
+
 
 ---  
 ## **Raw Data Generation**
@@ -47,7 +61,7 @@ While the trial covered Databricks usage, AWS charges for the **EC2 instances** 
 This **[fraud-detection-raw-data.py](./raw_data_simulation/fraud-detection-raw-data.py)** file generates **synthetic user and transaction data** raw data for this project and uploads it to **Amazon S3**.
 
 - **Purpose**: To create realistic **user and transaction records** for testing fraud detection algorithms.
-- **Output**: **JSON files** stored in **S3**, organized by year.  
+- **Output**: **JSON files** stored in **S3**, partitioned by year.  
 ### **Key Features**
 
 - **User Data**: Generates profiles for **1,000 users** with attributes like `UserID`, `Age`, `Gender`, and `Account Creation Date`.
@@ -114,7 +128,7 @@ Before working with **Databricks Asset Bundles**, several key steps and installa
     2. **Configure Workspace Profile**:
        - Use the following command to configure your workspace profile with the generated token:
          ```bash
-         databricks configure --profile databricks
+         databricks configure --
          ```
        - When prompted, enter your **Databricks Host URL** and the **Access Token**.
 
@@ -232,7 +246,13 @@ The `my_project.pipeline.yml` file defines the **Databricks Delta Live Tables (D
 
 ---
 
-### **Data Flow Explanation (Upstream to Downstream)**
+### **Data Flow Explanation (Upstream to Downstream)**  
+#### Table Naming Conventions
+
+In the **Fraud Detection Data Pipeline**, prefixes indicate the layer of the tables:  
+- **`br_`** for **Bronze Layer** tables (raw data),  
+- **`si_`** for **Silver Layer** tables (structured data), and  
+- **`go_`** for **Gold Layer** views (business insights).  
 
 1. **br_fraud_detection_raw_data_historical (Streaming Table)**
    - **Upstream Data Source**: This is the first stage of the pipeline, representing the **Bronze Layer** where raw fraud detection data is ingested. It streams from external sources (such as S3) and is loaded into the pipeline as a streaming table.
